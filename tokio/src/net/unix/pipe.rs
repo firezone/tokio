@@ -1366,20 +1366,22 @@ impl AsFd for Receiver {
 }
 
 /// Checks if the file descriptor is a pipe or a FIFO.
-fn is_pipe(fd: BorrowedFd<'_>) -> io::Result<bool> {
-    // Safety: `libc::stat` is C-like struct used for syscalls and all-zero
-    // byte pattern forms a valid value.
-    let mut stat: libc::stat = unsafe { std::mem::zeroed() };
-
-    // Safety: it's safe to call `fstat` with a valid, open file descriptor
-    // and a valid pointer to a `stat` struct.
-    let r = unsafe { libc::fstat(fd.as_raw_fd(), &mut stat) };
-
-    if r == -1 {
-        Err(io::Error::last_os_error())
-    } else {
-        Ok((stat.st_mode as libc::mode_t & libc::S_IFMT) == libc::S_IFIFO)
-    }
+fn is_pipe(_fd: BorrowedFd<'_>) -> io::Result<bool> {
+    // // Safety: `libc::stat` is C-like struct used for syscalls and all-zero
+    // // byte pattern forms a valid value.
+    // let mut stat: libc::stat = unsafe { std::mem::zeroed() };
+    //
+    // // Safety: it's safe to call `fstat` with a valid, open file descriptor
+    // // and a valid pointer to a `stat` struct.
+    // let r = unsafe { libc::fstat(fd.as_raw_fd(), &mut stat) };
+    //
+    // if r == -1 {
+    //     Err(io::Error::last_os_error())
+    // } else {
+    //     Ok((stat.st_mode as libc::mode_t & libc::S_IFMT) == libc::S_IFIFO)
+    // }
+    let stat: libc::stat = unsafe { std::mem::zeroed() };
+    Ok((stat.st_mode as libc::mode_t & libc::S_IFMT) == libc::S_IFIFO)
 }
 
 /// Gets file descriptor's flags by fcntl.
